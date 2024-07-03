@@ -4,6 +4,7 @@ import com.scalar.db.api.DistributedTransaction;
 import com.scalar.db.api.DistributedTransactionManager;
 import com.scalar.db.api.Get;
 import com.scalar.db.api.Put;
+import com.scalar.db.api.Scan;
 import com.scalar.db.api.Result;
 import com.scalar.db.exception.transaction.TransactionException;
 import com.scalar.db.io.Key;
@@ -11,6 +12,11 @@ import com.scalar.db.service.TransactionFactory;
 import java.io.IOException;
 import java.util.Optional;
 import java.io.File;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Kuruma {
 
@@ -24,7 +30,7 @@ public class Kuruma {
   private static final String TRIPS_ID = "trip_id";
   private static final String TRIPS_DESTINATION = "destination_city";
   private static final String TRIPS_DEPARTURE = "departure_city";
-  private static final String TRIPS_DRIVER = "driver_id";
+  private static final String TRIPS_DRIVER = "driver_name";
   
   private static final String TABLE_TRIPS_PASSENGERS = "trips_passengers";
   private static final String TRIPS_PASSENGERS_TRIP = "trip_id";
@@ -60,34 +66,111 @@ public class Kuruma {
     }
   }
 
+  public int trip_create(String driver, String departureCity, String destinationCity) throws TransactionException {
+    // Create random id for the trip
+    int min = 1;
+    int max = 999999999;
+    int id = min + (int)(Math.random() * ((max - min) + 1));
 
-  // public String account_get_name(String username) throws TransactionException {
-  //   // Start a transaction
-  //   DistributedTransaction tx = manager.start();
+    // Start a transaction
+    DistributedTransaction tx = manager.start();
 
-  //   try {
+    // TODO : make sure that the driver is valid
+    try {
+      Put put =
+          Put.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS)
+              .partitionKey(Key.ofInt(TRIPS_ID, id))
+              .textValue(TRIPS_DESTINATION, destinationCity)
+              .textValue(TRIPS_DEPARTURE, departureCity)
+              .textValue(TRIPS_DRIVER, driver)
+              .build();
+      tx.put(put);
 
-  //     // Retrieve the username for id
-  //     Get get =
-  //         Get.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLE_ACCOUNT)
-  //             .partitionKey(Key.ofText(ACCOUNT_USERNAME, username))
-  //             .build();
-  //     Optional<Result> result = tx.get(get);
+      tx.commit();
+      return id;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
 
-  //     String username = "None";
-  //     if (result.isPresent()) {
-  //       username = result.get().getText(ACCOUNT_USERNAME);
-  //     }
+  public List<Map<String, Object>> trip_get_all() throws TransactionException {
+    List<Map<String, Object>> trips = new ArrayList<>();
 
-  //     tx.commit();
-  //     return username;
-  //   } catch (Exception e) {
-  //     tx.abort();
-  //     throw e;
-  //   }
-  // }
+    // Start a transaction
+    DistributedTransaction tx = manager.start();
+
+    try {
+      Scan scan =
+              Scan.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS)
+              .all()
+              .build();
+
+      // Execute the scan operation
+      List<Result> results = tx.scan(scan);
+
+      // Process the results
+      for (Result result : results) {
+        Map<String, Object> trip = new HashMap<>();
+        trip.put("trip_id", result.getInt("trip_id"));
+        trip.put("destination_city", result.getText("destination_city"));
+        trip.put("departure_city", result.getText("departure_city"));
+        trip.put("driver_name", result.getText("driver_name"));
+
+        // Add the trip to the list
+        trips.add(trip);
+      }
+
+      tx.commit();
+      return trips;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
+
+  public List<Map<String, Object>> trip_get_driver(String driver_name) throws TransactionException {
+    List<Map<String, Object>> trips = new ArrayList<>();
+
+    // Start a transaction
+    DistributedTransaction tx = manager.start();
+
+    try {
+      Scan scan =
+              Scan.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS)
+              .all()
+              .build();
+
+      // Execute the scan operation
+      List<Result> results = tx.scan(scan);
+
+      // Process the results
+      for (Result result : results) {
+        if (result.getText("driver_name").equals(driver_name)){
+          Map<String, Object> trip = new HashMap<>();
+          trip.put("trip_id", result.getInt("trip_id"));
+          trip.put("destination_city", result.getText("destination_city"));
+          trip.put("departure_city", result.getText("departure_city"));
+          trip.put("driver_name", result.getText("driver_name"));
+
+          // Add the trip to the list
+          trips.add(trip);
+        }
+      }
+
+      tx.commit();
+      return trips;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
 
   public Boolean account_login(String username, String password) throws TransactionException {
     // Start a transaction
@@ -116,145 +199,6 @@ public class Kuruma {
       throw e;
     }
   }
-
-
-  // public void account_login(String username, String password) throws TransactionException {
-  //   // Start a transaction
-  //   DistributedTransaction tx = manager.start();
-
-  //   try {
-
-
-  //     tx.commit();
-  //   } catch (Exception e) {
-  //     tx.abort();
-  //     throw e;
-  //   }
-  // }
-
-
-
-  // public void charge(String id, int amount) throws TransactionException {
-  //   // Start a transaction
-  //   DistributedTransaction tx = manager.start();
-
-  //   try {
-  //     // Retrieve the current balance for id
-  //     Get get =
-  //         Get.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, id))
-  //             .build();
-  //     Optional<Result> result = tx.get(get);
-
-  //     // Calculate the balance
-  //     int balance = amount;
-  //     if (result.isPresent()) {
-  //       int current = result.get().getInt(BALANCE);
-  //       balance += current;
-  //     }
-
-  //     // Update the balance
-  //     Put put =
-  //         Put.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, id))
-  //             .intValue(BALANCE, balance)
-  //             .build();
-  //     tx.put(put);
-
-  //     // Commit the transaction (records are automatically recovered in case of failure)
-  //     tx.commit();
-  //   } catch (Exception e) {
-  //     tx.abort();
-  //     throw e;
-  //   }
-  // }
-
-  // public void pay(String fromId, String toId, int amount) throws TransactionException {
-  //   // Start a transaction
-  //   DistributedTransaction tx = manager.start();
-
-  //   try {
-  //     // Retrieve the current balances for ids
-  //     Get fromGet =
-  //         Get.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, fromId))
-  //             .build();
-  //     Get toGet =
-  //         Get.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, toId))
-  //             .build();
-  //     Optional<Result> fromResult = tx.get(fromGet);
-  //     Optional<Result> toResult = tx.get(toGet);
-
-  //     // Calculate the balances (it assumes that both accounts exist)
-  //     int newFromBalance = fromResult.get().getInt(BALANCE) - amount;
-  //     int newToBalance = toResult.get().getInt(BALANCE) + amount;
-  //     if (newFromBalance < 0) {
-  //       throw new RuntimeException(fromId + " doesn't have enough balance.");
-  //     }
-
-  //     // Update the balances
-  //     Put fromPut =
-  //         Put.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, fromId))
-  //             .intValue(BALANCE, newFromBalance)
-  //             .build();
-  //     Put toPut =
-  //         Put.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, toId))
-  //             .intValue(BALANCE, newToBalance)
-  //             .build();
-  //     tx.put(fromPut);
-  //     tx.put(toPut);
-
-  //     // Commit the transaction (records are automatically recovered in case of failure)
-  //     tx.commit();
-  //   } catch (Exception e) {
-  //     tx.abort();
-  //     throw e;
-  //   }
-  // }
-
-  // public int getBalance(String id) throws TransactionException {
-  //   // Start a transaction
-  //   DistributedTransaction tx = manager.start();
-
-  //   try {
-  //     // Retrieve the current balances for id
-  //     Get get =
-  //         Get.newBuilder()
-  //             .namespace(NAMESPACE)
-  //             .table(TABLENAME)
-  //             .partitionKey(Key.ofText(ID, id))
-  //             .build();
-  //     Optional<Result> result = tx.get(get);
-
-  //     int balance = -1;
-  //     if (result.isPresent()) {
-  //       balance = result.get().getInt(BALANCE);
-  //     }
-
-  //     // Commit the transaction
-  //     tx.commit();
-
-  //     return balance;
-  //   } catch (Exception e) {
-  //     tx.abort();
-  //     throw e;
-  //   }
-  // }
 
   public void close() {
     manager.close();
