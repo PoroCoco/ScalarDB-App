@@ -7,10 +7,14 @@ repositories {
 }
 
 application {
-    mainClass = "sample.KurumaMain"
+    // mainClass = "sample.KurumaMain"
+    mainClass = "sample.App"
 }
 
 dependencies {
+    implementation 'org.eclipse.jetty:jetty-server:9.4.44.v20210927'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.35.v20201120'
+    implementation 'org.eclipse.jetty:jetty-servlets:9.4.35.v20201120'
     implementation 'com.scalar-labs:scalardb:3.12.2'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
 }

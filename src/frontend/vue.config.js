@@ -8,7 +8,7 @@ module.exports = {
     port: 8081, // Change le port du serveur de développement Vue.js
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // Cible le backend Jetty
+        target: 'http://localhost:7777', // Cible le backend Jetty
         changeOrigin: true
       }
     }

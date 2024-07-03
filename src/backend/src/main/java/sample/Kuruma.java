@@ -10,6 +10,7 @@ import com.scalar.db.io.Key;
 import com.scalar.db.service.TransactionFactory;
 import java.io.IOException;
 import java.util.Optional;
+import java.io.File;
 
 public class Kuruma {
 
@@ -31,7 +32,8 @@ public class Kuruma {
 
   private final DistributedTransactionManager manager;
 
-  public Kuruma(String scalarDBProperties) throws IOException {
+  public Kuruma() throws IOException { //TODO close kuruma
+    String scalarDBProperties = System.getProperty("user.dir") + File.separator + "scalardb.properties";
     TransactionFactory factory = TransactionFactory.create(scalarDBProperties);
     manager = factory.getTransactionManager();
   }

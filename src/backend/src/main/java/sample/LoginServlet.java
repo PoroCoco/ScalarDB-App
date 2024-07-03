@@ -13,11 +13,6 @@ public class LoginServlet extends HttpServlet {
     private static final Map<String, String> users = new HashMap<>();
     private static final Map<String, String> sessions = new ConcurrentHashMap<>();
 
-    static {
-        users.put("user1", "password1");
-        users.put("user2", "password2");
-    }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
@@ -29,16 +24,20 @@ public class LoginServlet extends HttpServlet {
         String[] credentials = stringBuilder.toString().split(":");
         String username = credentials[0];
         String password = credentials[1];
+        try {
+            Kuruma kuruma = new Kuruma();
+            if (kuruma.account_login(username, password)) {
+                String sessionId = req.getSession(true).getId();
+                sessions.put(sessionId, username);
 
-        if (users.containsKey(username) && users.get(username).equals(password)) {
-            String sessionId = req.getSession(true).getId();
-            sessions.put(sessionId, username);
+                resp.setContentType("application/json");
+                resp.setCharacterEncoding("UTF-8");
+                resp.getWriter().write("{\"sessionId\": \"" + sessionId + "\", \"username\": \"" + username + "\"}");
+            } else {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            }
+        }catch (Exception e){
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
-            resp.getWriter().write("{\"sessionId\": \"" + sessionId + "\", \"username\": \"" + username + "\"}");
-        } else {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 
