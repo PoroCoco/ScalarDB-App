@@ -7,7 +7,7 @@ repositories {
 }
 
 application {
-    mainClass = "sample.ElectronicMoneyMain"
+    mainClass = "sample.KurumaMain"
 }
 
 dependencies {

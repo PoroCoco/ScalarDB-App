@@ -1,0 +1,37 @@
+{
+  "bdd.account": {
+    "transaction": true,
+    "partition-key": [
+      "username"
+    ],
+    "clustering-key": [], 
+    "columns": {
+      "username": "TEXT",
+      "password": "TEXT"
+    }
+  },
+  "bdd.trips": {
+    "transaction": true,
+    "partition-key": [
+      "trip_id"
+    ],
+    "clustering-key": [], 
+    "columns": {
+      "trip_id": "INT",
+      "destination_city": "TEXT",
+      "departure_city": "TEXT",
+      "driver_name": "TEXT"
+    }
+  },
+  "bdd.trips_passengers": {
+    "transaction": true,
+    "partition-key": [
+      "trip_id"
+    ],
+    "clustering-key": [], 
+    "columns": {
+      "trip_id": "INT",
+      "username": "TEXT"
+    }
+  }
+}
