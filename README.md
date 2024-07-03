@@ -8,15 +8,22 @@ Using cassandra binaries, launch cassandra in front mode
 
     bin/cassandra -f
 
-
-## Start backend
+## CLI-Mode 
 
     cd src/backend
 
-    ./gradlew run
+    ./gradlew cli
+
+## Web interface
+
+### Start backend
+
+    cd src/backend
+
+    ./gradlew server
 
 
-## Start frontend
+### Start frontend
 
     cd src/frontend
 

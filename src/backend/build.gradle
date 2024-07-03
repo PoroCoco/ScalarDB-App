@@ -6,10 +6,16 @@ repositories {
     mavenCentral()
 }
 
-application {
-    // mainClass = "sample.KurumaMain"
-    mainClass = "sample.App"
+task(server, dependsOn: 'classes', type: JavaExec) {
+   mainClass = 'sample.App'
+    classpath = sourceSets.main.runtimeClasspath
 }
+
+task(cli, dependsOn: 'classes', type: JavaExec) {
+    mainClass = "sample.KurumaMain"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.12.3'
