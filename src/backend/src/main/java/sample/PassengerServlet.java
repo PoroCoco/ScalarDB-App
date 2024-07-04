@@ -48,8 +48,16 @@ public class PassengerServlet extends HttpServlet {
 
         String requestBody = stringBuilder.toString();
         
-        System.out.println(requestBody);
-        // int tripId = 0;
+        JSONObject jsonObject = new JSONObject(requestBody);
+        int tripId = jsonObject.getInt("trip_id");
+        try {
+            kuruma.passenger_register(username, tripId);
+        } catch (Exception e) {
+
+        }
+
+
+
         // String trips_json = "";
         // try {
         //     kuruma.passenger_register(username, tripId);
@@ -66,7 +74,7 @@ public class PassengerServlet extends HttpServlet {
 
         // }
 
-        resp.getWriter().write(String.format("{\"trips\": ok}"));
+        resp.getWriter().write(String.format("{\"trips\": \"ok\"}"));
     }
 
     private static String convertListToJSON(List<Map<String, Object>> data) {
