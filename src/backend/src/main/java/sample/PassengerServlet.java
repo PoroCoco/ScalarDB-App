@@ -49,7 +49,7 @@ public class PassengerServlet extends HttpServlet {
                 trips.add(kuruma.trip_get_from_id(id));
             }
             trips_json = convertListToJSON(trips);
-            System.out.println(tripJson);
+            System.out.println(trips_json);
         } catch (Exception e) {
 
         }
