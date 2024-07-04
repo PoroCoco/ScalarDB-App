@@ -7,13 +7,23 @@
         <div class="field">
           <label class="label">Username</label>
           <div class="control">
-            <input class="input" type="text" v-model="username" placeholder="Enter username">
+            <input
+              class="input"
+              type="text"
+              v-model="username"
+              placeholder="Enter username"
+            />
           </div>
         </div>
         <div class="field">
           <label class="label">Password</label>
           <div class="control">
-            <input class="input" type="password" v-model="password" placeholder="Enter password">
+            <input
+              class="input"
+              type="password"
+              v-model="password"
+              placeholder="Enter password"
+            />
           </div>
         </div>
         <button class="button is-primary" @click="login">Login</button>
@@ -27,8 +37,18 @@
         <h2>Welcome, {{ loggedInUser }}</h2>
         <div class="tabs">
           <ul>
-            <li :class="{ 'is-active': activeTab === 'myTrips' }" @click="activeTab = 'myTrips'"><a>My Trips</a></li>
-            <li :class="{ 'is-active': activeTab === 'searchTrips' }" @click="activeTab = 'searchTrips'"><a>Search Trips</a></li>
+            <li
+              :class="{ 'is-active': activeTab === 'myTrips' }"
+              @click="activeTab = 'myTrips'"
+            >
+              <a>My Trips</a>
+            </li>
+            <li
+              :class="{ 'is-active': activeTab === 'searchTrips' }"
+              @click="activeTab = 'searchTrips'"
+            >
+              <a>Search Trips</a>
+            </li>
           </ul>
         </div>
 
@@ -36,27 +56,68 @@
           <div class="field">
             <label class="label">Departure City</label>
             <div class="control">
-              <input class="input" type="text" v-model="departureCity" placeholder="Enter departure city">
+              <input
+                class="input"
+                type="text"
+                v-model="departureCity"
+                placeholder="Enter departure city"
+              />
             </div>
           </div>
           <div class="field">
             <label class="label">Destination City</label>
             <div class="control">
-              <input class="input" type="text" v-model="destinationCity" placeholder="Enter destination city">
+              <input
+                class="input"
+                type="text"
+                v-model="destinationCity"
+                placeholder="Enter destination city"
+              />
             </div>
           </div>
-          <button class="button is-primary" @click="createTrip">Create Trip</button>
-          <button class="button is-info" @click="fetchMyTrips">Get My Trips</button>
+          <button class="button is-primary" @click="createTrip">
+            Create Trip
+          </button>
+          <button class="button is-info" @click="fetchMyTrips">
+            Get My Trips
+          </button>
 
           <div v-if="myTrips.length > 0" class="mt-4">
             <h3 class="title is-4">Your Trips:</h3>
             <div class="columns is-multiline">
-              <div v-for="(trip, index) in myTrips" :key="index" class="column is-one-third">
+              <div
+                v-for="(trip, index) in myTrips"
+                :key="index"
+                class="column is-one-third"
+              >
                 <div class="box">
                   <h4 class="subtitle is-5">Trip {{ index + 1 }}</h4>
                   <p><strong>Driver:</strong> {{ trip.driver_name }}</p>
                   <p><strong>Departure:</strong> {{ trip.departure_city }}</p>
-                  <p><strong>Destination:</strong> {{ trip.destination_city }}</p>
+                  <p>
+                    <strong>Destination:</strong> {{ trip.destination_city }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- register -->
+          <div v-if="registeredTrips.length > 0" class="mt-4">
+            <h3 class="title is-4">Registered Trips:</h3>
+            <div class="columns is-multiline">
+              <div
+                v-for="(trip, index) in registeredTrips"
+                :key="index"
+                class="column is-one-third"
+              >
+                <div class="box">
+                  <h4 class="subtitle is-5">Trip {{ index + 1 }}</h4>
+                  <p><strong>Driver:</strong> {{ trip.driver_name }}</p>
+                  <p><strong>Departure:</strong> {{ trip.departure_city }}</p>
+                  <p>
+                    <strong>Destination:</strong> {{ trip.destination_city }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -64,17 +125,25 @@
         </div>
 
         <div v-show="activeTab === 'searchTrips'">
-          <button class="button is-info" @click="fetchAllTrips">Get All Trips</button>
+          <button class="button is-info" @click="fetchAllTrips">
+            Get All Trips
+          </button>
 
           <div v-if="allTrips.length > 0" class="mt-4">
             <h3 class="title is-4">All Trips:</h3>
             <div class="columns is-multiline">
-              <div v-for="(trip, index) in allTrips" :key="index" class="column is-one-third">
-                <div class="box">
+              <div
+                v-for="(trip, index) in allTrips"
+                :key="index"
+                class="column is-one-third"
+              >
+                <div class="box trip-box" @click="registerForTrip(trip)">
                   <h4 class="subtitle is-5">Trip {{ index + 1 }}</h4>
                   <p><strong>Driver:</strong> {{ trip.driver_name }}</p>
                   <p><strong>Departure:</strong> {{ trip.departure_city }}</p>
-                  <p><strong>Destination:</strong> {{ trip.destination_city }}</p>
+                  <p>
+                    <strong>Destination:</strong> {{ trip.destination_city }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -90,10 +159,10 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref } from "vue";
 
 export default {
-  name: 'App',
+  name: "App",
   setup() {
     const username = ref("");
     const password = ref("");
@@ -103,19 +172,20 @@ export default {
     const isLoggedIn = ref(false);
     const sessionId = ref("");
     const myTrips = ref([]);
+    const registeredTrips = ref([]);
     const allTrips = ref([]);
     const errorMessage = ref("");
     const loginError = ref(false);
-    const activeTab = ref('myTrips');
+    const activeTab = ref("myTrips");
 
     const login = async () => {
       try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
+        const response = await fetch("/api/login", {
+          method: "POST",
           headers: {
-            'Content-Type': 'text/plain'
+            "Content-Type": "text/plain",
           },
-          body: `login:${username.value}:${password.value}`
+          body: `login:${username.value}:${password.value}`,
         });
         if (response.status === 200) {
           const data = await response.json();
@@ -127,23 +197,23 @@ export default {
         } else {
           loginError.value = true;
           const errorData = await response.json();
-          errorMessage.value = errorData.error || 'Login failed';
+          errorMessage.value = errorData.error || "Login failed";
         }
       } catch (error) {
-        console.error('Error logging in:', error);
-        errorMessage.value = 'Error logging in';
+        console.error("Error logging in:", error);
+        errorMessage.value = "Error logging in";
         loginError.value = true;
       }
     };
 
     const register = async () => {
       try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
+        const response = await fetch("/api/login", {
+          method: "POST",
           headers: {
-            'Content-Type': 'text/plain'
+            "Content-Type": "text/plain",
           },
-          body: `register:${username.value}:${password.value}`
+          body: `register:${username.value}:${password.value}`,
         });
         if (response.status === 200) {
           const data = await response.json();
@@ -154,26 +224,26 @@ export default {
           loginError.value = false;
         } else {
           const errorData = await response.json();
-          errorMessage.value = errorData.error || 'Registration failed';
+          errorMessage.value = errorData.error || "Registration failed";
         }
       } catch (error) {
-        console.error('Error registering:', error);
-        errorMessage.value = 'Error registering';
+        console.error("Error registering:", error);
+        errorMessage.value = "Error registering";
       }
     };
 
     const createTrip = async () => {
       try {
-        const response = await fetch('/api/trips', {
-          method: 'POST',
+        const response = await fetch("/api/trips", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Session-Id': sessionId.value
+            "Content-Type": "application/json",
+            "Session-Id": sessionId.value,
           },
           body: JSON.stringify({
             departure_city: departureCity.value,
-            destination_city: destinationCity.value
-          })
+            destination_city: destinationCity.value,
+          }),
         });
         if (response.status === 200) {
           const data = await response.json();
@@ -183,11 +253,11 @@ export default {
           errorMessage.value = "";
         } else {
           const errorData = await response.json();
-          errorMessage.value = errorData.error || 'Failed to create trip';
+          errorMessage.value = errorData.error || "Failed to create trip";
         }
       } catch (error) {
-        console.error('Error creating trip:', error);
-        errorMessage.value = 'Error creating trip';
+        console.error("Error creating trip:", error);
+        errorMessage.value = "Error creating trip";
       }
     };
 
@@ -200,21 +270,21 @@ export default {
           errorMessage.value = "";
         } else {
           const errorData = await response.json();
-          errorMessage.value = errorData.error || 'Failed to fetch trips';
+          errorMessage.value = errorData.error || "Failed to fetch trips";
         }
       } catch (error) {
-        console.error('Error fetching trips:', error);
-        errorMessage.value = 'Error fetching trips';
+        console.error("Error fetching trips:", error);
+        errorMessage.value = "Error fetching trips";
       }
     };
 
     const fetchAllTrips = async () => {
       try {
         const response = await fetch(`/api/trips`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Session-Id': sessionId.value
-          }
+            "Session-Id": sessionId.value,
+          },
         });
         if (response.status === 200) {
           const data = await response.json();
@@ -222,11 +292,42 @@ export default {
           errorMessage.value = "";
         } else {
           const errorData = await response.json();
-          errorMessage.value = errorData.error || 'Failed to fetch all trips';
+          errorMessage.value = errorData.error || "Failed to fetch all trips";
         }
       } catch (error) {
-        console.error('Error fetching all trips:', error);
-        errorMessage.value = 'Error fetching all trips';
+        console.error("Error fetching all trips:", error);
+        errorMessage.value = "Error fetching all trips";
+      }
+    };
+
+    // Register
+    const registerForTrip = async (trip) => {
+      if (confirm("Do you want to register for this trip?")) {
+        try {
+          const response = await fetch(`/api/passenger`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "text/plain",
+              "Session-Id": sessionId.value,
+            },
+            body: JSON.stringify({
+              trip_id: trip.trip_id.toString(),
+              username: username.value,
+            }),
+          });
+          if (response.status === 200) {
+            const data = await response.json();
+            registeredTrips.value.push(data.tripDetails);
+            errorMessage.value = "";
+          } else {
+            const errorData = await response.json();
+            errorMessage.value =
+              errorData.error || "Failed to register for trip";
+          }
+        } catch (error) {
+          console.error("Error registering for trip:", error);
+          errorMessage.value = "Error registering for trip";
+        }
       }
     };
 
@@ -239,6 +340,7 @@ export default {
       isLoggedIn,
       sessionId,
       myTrips,
+      registeredTrips,
       allTrips,
       errorMessage,
       loginError,
@@ -247,9 +349,10 @@ export default {
       register,
       createTrip,
       fetchMyTrips,
-      fetchAllTrips
+      fetchAllTrips,
+      registerForTrip,
     };
-  }
+  },
 };
 </script>
 
@@ -268,5 +371,8 @@ export default {
 }
 .mt-4 {
   margin-top: 40px;
+}
+.trip-box {
+  cursor: pointer;
 }
 </style>
