@@ -16,6 +16,11 @@ task(cli, dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task(fill, dependsOn: 'classes', type: JavaExec) {
+    mainClass = "sample.FillDB"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.12.3'
