@@ -28,7 +28,7 @@ public class PassengerServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String sessionId = req.getParameter("Session-Id");
+        String sessionId = req.getHeader("Session-Id");
         String username = LoginServlet.getUsername(sessionId);
 
         if (username == null) {
