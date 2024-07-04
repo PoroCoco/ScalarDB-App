@@ -71,7 +71,7 @@ public class TripServlet extends HttpServlet {
         try {
             Kuruma kuruma = new Kuruma();
 
-            List<Map<String, Object>> trips = kuruma.trip_get_all();
+            List<Map<String, Object>> trips = kuruma.trip_get_driver(username);
             trips_json = convertListToJSON(trips);
 
             kuruma.close();
@@ -130,24 +130,22 @@ public class TripServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // New endpoint to get all trips
-        List<String> allTrips = new ArrayList<>();
-        for (Entry<String, List<String>> entry : trips.entrySet()) {
-            allTrips.addAll(entry.getValue());
-        }
-
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        StringBuilder tripsJson = new StringBuilder("[");
-        for (String trip : allTrips) {
-            if (tripsJson.length() > 1) {
-                tripsJson.append(",");
-            }
-            tripsJson.append(trip);
-        }
-        tripsJson.append("]");
+        String trips_json = "";
+        try {
+            Kuruma kuruma = new Kuruma();
 
-        resp.getWriter().write(String.format("{\"trips\": %s}", tripsJson.toString()));
+            List<Map<String, Object>> trips = kuruma.trip_get_all();
+            trips_json = convertListToJSON(trips);
+
+            kuruma.close();
+        } catch (Exception e) {
+
+        }
+
+        resp.getWriter().write(String.format("{\"trips\": %s}", trips_json));
     }
     
 }
