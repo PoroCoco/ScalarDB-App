@@ -27,7 +27,7 @@ public class PassengerServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sessionId = req.getParameter("sessionId");
         String username = LoginServlet.getUsername(sessionId);
 
@@ -40,21 +40,34 @@ public class PassengerServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        String trips_json = "";
-        try {
-            List<Integer> trip_ids = kuruma.passenger_get_from_username(username);
-
-            List<Map<String, Object>> trips = new ArrayList<>(); 
-            for (int id : trip_ids){
-                trips.add(kuruma.trip_get_from_id(id));
-            }
-            trips_json = convertListToJSON(trips);
-            System.out.println(trips_json);
-        } catch (Exception e) {
-
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+        while ((line = req.getReader().readLine()) != null) {
+            stringBuilder.append(line);
         }
 
-        resp.getWriter().write(String.format("{\"trips\": %s}", trips_json));
+        String requestBody = stringBuilder.toString();
+        
+        System.out.println(requestBody);
+        return;
+        // int tripId = 0;
+        // String trips_json = "";
+        // try {
+        //     kuruma.passenger_register(username, tripId);
+        //     System.out.println("Added the user "+ username+" to trip " + tripId);
+        //     // List<Integer> trip_ids = kuruma.passenger_get_from_username(username);
+
+        //     // List<Map<String, Object>> trips = new ArrayList<>(); 
+        //     // for (int id : trip_ids){
+        //     //     trips.add(kuruma.trip_get_from_id(id));
+        //     // }
+        //     // trips_json = convertListToJSON(trips);
+        //     // System.out.println(trips_json);
+        // } catch (Exception e) {
+
+        // }
+
+        // resp.getWriter().write(String.format("{\"trips\": %s}", trips_json));
     }
 
     private static String convertListToJSON(List<Map<String, Object>> data) {

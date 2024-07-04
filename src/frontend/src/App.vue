@@ -305,14 +305,13 @@ export default {
       if (confirm("Do you want to register for this trip?")) {
         try {
           const response = await fetch(`/api/passenger`, {
-            method: "GET",
+            method: "PUT",
             headers: {
               "Content-Type": "text/plain",
               "Session-Id": sessionId.value,
             },
             body: JSON.stringify({
-              trip_id: trip.trip_id.toString(),
-              username: username.value,
+              trip_id: trip.trip_id.toString()
             }),
           });
           if (response.status === 200) {
