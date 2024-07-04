@@ -20,6 +20,7 @@ public class App {
         // Ajouter les servlets pour les API
         handler.addServlet(new ServletHolder(new LoginServlet()), "/api/login");
         handler.addServlet(new ServletHolder(new TripServlet()), "/api/trips");
+        handler.addServlet(new ServletHolder(new PassengerServlet()), "/api/passenger");
         
         // Configurer le servlet pour servir les fichiers statiques
         ServletHolder staticServlet = new ServletHolder("default", DefaultServlet.class);

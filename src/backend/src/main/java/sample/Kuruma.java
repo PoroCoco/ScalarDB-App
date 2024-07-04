@@ -313,6 +313,34 @@ public class Kuruma {
     }
   }
 
+  public Map<String, Object> trip_get_from_id(int tripId) throws TransactionException {
+    Map<String, Object> trip = new HashMap<>();
+    DistributedTransaction tx = manager.start();
+    try {
+      // Retrieve the username for id
+      Get get =
+          Get.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS)
+              .partitionKey(Key.ofInt(TRIPS_ID, tripId))
+              .build();
+      Optional<Result> result = tx.get(get);
+
+      if (result.isPresent()) {
+        trip.put("trip_id", result.get().getInt("trip_id"));
+        trip.put("destination_city", result.get().getText("destination_city"));
+        trip.put("departure_city", result.get().getText("departure_city"));
+        trip.put("driver_name", result.get().getText("driver_name"));
+      }
+
+      tx.commit();
+      return trip;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
+
 
 
   public void close() {
