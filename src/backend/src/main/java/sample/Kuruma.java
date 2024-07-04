@@ -133,6 +133,41 @@ public class Kuruma {
     }
   }
 
+    public List<Map<String, Object>> account_get_all() throws TransactionException {
+    List<Map<String, Object>> accounts = new ArrayList<>();
+
+    // Start a transaction
+    DistributedTransaction tx = manager.start();
+
+    try {
+      Scan scan =
+              Scan.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_ACCOUNT)
+              .all()
+              .build();
+
+      // Execute the scan operation
+      List<Result> results = tx.scan(scan);
+
+      // Process the results
+      for (Result result : results) {
+        Map<String, Object> account = new HashMap<>();
+        account.put(ACCOUNT_USERNAME, result.getText(ACCOUNT_USERNAME));
+        account.put(ACCOUNT_PASSWORD, result.getText(ACCOUNT_PASSWORD));
+
+        // Add the trip to the list
+        accounts.add(account);
+      }
+
+      tx.commit();
+      return accounts;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
+
   public List<Map<String, Object>> trip_get_driver(String driver_name) throws TransactionException {
     List<Map<String, Object>> trips = new ArrayList<>();
 

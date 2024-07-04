@@ -35,29 +35,19 @@ public class KurumaMain {
       System.out.println("Created a new trip id("+ trip_id +")");
     }else if ("-get_all_trips".equals(args[0]) && args.length == 1){
       List<Map<String, Object>> trips = kuruma.trip_get_all();
-
-      // Convert the trip list to a json string
-      String trips_json = "";
-      ObjectMapper objectMapper = new ObjectMapper();
-      try {
-        trips_json = objectMapper.writeValueAsString(trips);
-      } catch (Exception e) {
-        throw new RuntimeException("Error converting trips to JSON", e);
-      }
+      String trips_json = convertListToJSON(trips);
       System.out.println(trips_json);
     }else if ("-get_driver_trips".equals(args[0]) && args.length == 2){ //TODO Check JSON is fine when there is no trips 
       String username = args[1];
       List<Map<String, Object>> trips = kuruma.trip_get_driver(username);
-
-      // Convert the trip list to a json string
-      String trips_json = "";
-      ObjectMapper objectMapper = new ObjectMapper();
-      try {
-        trips_json = objectMapper.writeValueAsString(trips);
-      } catch (Exception e) {
-        throw new RuntimeException("Error converting trips to JSON", e);
-      }
+      String trips_json = convertListToJSON(trips);
       System.out.println(trips_json);
+    }else if ("-get_account_all".equals(args[0]) && args.length == 1){
+      List<Map<String, Object>> accounts = kuruma.account_get_all();
+      int accounts_count = accounts.size();
+      String accounts_json = convertListToJSON(accounts);
+      System.out.println("There are " + accounts_count + " accounts : ");
+      System.out.println(accounts_json);
     }else{
       kuruma.close();
       System.out.println("Unknown command : " + args[1] + " with total count of args at " + args.length);
@@ -67,6 +57,19 @@ public class KurumaMain {
 
     kuruma.close();
   }
+
+  private static String convertListToJSON(List<Map<String, Object>> data) {
+    // Convert the trip list to a json string
+    String json = "";
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      json = objectMapper.writeValueAsString(data);
+    } catch (Exception e) {
+      throw new RuntimeException("Error converting accounts to JSON", e);
+    }
+    return json;
+  }
+
 
   private static void printUsageAndExit() {
     System.err.println(
