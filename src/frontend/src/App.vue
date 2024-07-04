@@ -2,7 +2,7 @@
   <div id="app" class="section">
     <div class="container">
       <h1 class="title">Carpooling Application</h1>
-      
+
       <div v-if="!isLoggedIn">
         <div class="field">
           <label class="label">Username</label>
@@ -25,34 +25,62 @@
 
       <div v-else>
         <h2>Welcome, {{ loggedInUser }}</h2>
-        <div class="field">
-          <label class="label">Departure City</label>
-          <div class="control">
-            <input class="input" type="text" v-model="departureCity" placeholder="Enter departure city">
-          </div>
+        <div class="tabs">
+          <ul>
+            <li :class="{ 'is-active': activeTab === 'myTrips' }" @click="activeTab = 'myTrips'"><a>My Trips</a></li>
+            <li :class="{ 'is-active': activeTab === 'searchTrips' }" @click="activeTab = 'searchTrips'"><a>Search Trips</a></li>
+          </ul>
         </div>
-        <div class="field">
-          <label class="label">Destination City</label>
-          <div class="control">
-            <input class="input" type="text" v-model="destinationCity" placeholder="Enter destination city">
-          </div>
-        </div>
-        <button class="button is-primary" @click="createTrip">Create Trip</button>
-        <button class="button is-info" @click="fetchTrips">Get Trips</button>
 
-        <div v-if="trips.length > 0" class="mt-4">
-          <h3 class="title is-4">Your Trips:</h3>
-          <div class="columns is-multiline">
-            <div v-for="(trip, index) in trips" :key="index" class="column is-one-third">
-              <div class="box">
-                <h4 class="subtitle is-5">Trip {{ index + 1 }}</h4>
-                <p><strong>Driver:</strong> {{ trip.driver_name }}</p>
-                <p><strong>Departure:</strong> {{ trip.departure_city }}</p>
-                <p><strong>Destination:</strong> {{ trip.destination_city }}</p>
+        <div v-show="activeTab === 'myTrips'">
+          <div class="field">
+            <label class="label">Departure City</label>
+            <div class="control">
+              <input class="input" type="text" v-model="departureCity" placeholder="Enter departure city">
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Destination City</label>
+            <div class="control">
+              <input class="input" type="text" v-model="destinationCity" placeholder="Enter destination city">
+            </div>
+          </div>
+          <button class="button is-primary" @click="createTrip">Create Trip</button>
+          <button class="button is-info" @click="fetchMyTrips">Get My Trips</button>
+
+          <div v-if="myTrips.length > 0" class="mt-4">
+            <h3 class="title is-4">Your Trips:</h3>
+            <div class="columns is-multiline">
+              <div v-for="(trip, index) in myTrips" :key="index" class="column is-one-third">
+                <div class="box">
+                  <h4 class="subtitle is-5">Trip {{ index + 1 }}</h4>
+                  <p><strong>Driver:</strong> {{ trip.driver_name }}</p>
+                  <p><strong>Departure:</strong> {{ trip.departure_city }}</p>
+                  <p><strong>Destination:</strong> {{ trip.destination_city }}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div v-show="activeTab === 'searchTrips'">
+          <button class="button is-info" @click="fetchAllTrips">Get All Trips</button>
+
+          <div v-if="allTrips.length > 0" class="mt-4">
+            <h3 class="title is-4">All Trips:</h3>
+            <div class="columns is-multiline">
+              <div v-for="(trip, index) in allTrips" :key="index" class="column is-one-third">
+                <div class="box">
+                  <h4 class="subtitle is-5">Trip {{ index + 1 }}</h4>
+                  <p><strong>Driver:</strong> {{ trip.driver_name }}</p>
+                  <p><strong>Departure:</strong> {{ trip.departure_city }}</p>
+                  <p><strong>Destination:</strong> {{ trip.destination_city }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div v-if="errorMessage" class="notification is-danger mt-2">
           <p>{{ errorMessage }}</p>
         </div>
@@ -74,9 +102,11 @@ export default {
     const loggedInUser = ref("");
     const isLoggedIn = ref(false);
     const sessionId = ref("");
-    const trips = ref([]);
+    const myTrips = ref([]);
+    const allTrips = ref([]);
     const errorMessage = ref("");
     const loginError = ref(false);
+    const activeTab = ref('myTrips');
 
     const login = async () => {
       try {
@@ -147,7 +177,7 @@ export default {
         });
         if (response.status === 200) {
           const data = await response.json();
-          trips.value.push(data.tripDetails);
+          myTrips.value.push(data.tripDetails);
           departureCity.value = "";
           destinationCity.value = "";
           errorMessage.value = "";
@@ -161,12 +191,12 @@ export default {
       }
     };
 
-    const fetchTrips = async () => {
+    const fetchMyTrips = async () => {
       try {
         const response = await fetch(`/api/trips?sessionId=${sessionId.value}`);
         if (response.status === 200) {
           const data = await response.json();
-          trips.value = data.trips;
+          myTrips.value = data.trips;
           errorMessage.value = "";
         } else {
           const errorData = await response.json();
@@ -178,6 +208,28 @@ export default {
       }
     };
 
+    const fetchAllTrips = async () => {
+      try {
+        const response = await fetch(`/api/trips`, {
+          method: 'PUT',
+          headers: {
+            'Session-Id': sessionId.value
+          }
+        });
+        if (response.status === 200) {
+          const data = await response.json();
+          allTrips.value = data.trips;
+          errorMessage.value = "";
+        } else {
+          const errorData = await response.json();
+          errorMessage.value = errorData.error || 'Failed to fetch all trips';
+        }
+      } catch (error) {
+        console.error('Error fetching all trips:', error);
+        errorMessage.value = 'Error fetching all trips';
+      }
+    };
+
     return {
       username,
       password,
@@ -186,13 +238,16 @@ export default {
       loggedInUser,
       isLoggedIn,
       sessionId,
-      trips,
+      myTrips,
+      allTrips,
       errorMessage,
       loginError,
+      activeTab,
       login,
       register,
       createTrip,
-      fetchTrips
+      fetchMyTrips,
+      fetchAllTrips
     };
   }
 };

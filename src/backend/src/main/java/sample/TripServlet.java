@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,8 +37,7 @@ public class TripServlet extends HttpServlet {
                 "{\"driver_name\": \"%s\", \"trip_id\": %d, %s}",
                 username,
                 new Random().nextInt(1000000000),
-                requestBody.substring(1, requestBody.length() - 1)
-        );
+                requestBody.substring(1, requestBody.length() - 1));
 
         trips.computeIfAbsent(username, k -> new ArrayList<>()).add(tripDetails);
 
@@ -74,4 +74,28 @@ public class TripServlet extends HttpServlet {
 
         resp.getWriter().write(String.format("{\"trips\": %s}", tripsJson.toString()));
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        // New endpoint to get all trips
+        List<String> allTrips = new ArrayList<>();
+        for (Entry<String, List<String>> entry : trips.entrySet()) {
+            allTrips.addAll(entry.getValue());
+        }
+
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        StringBuilder tripsJson = new StringBuilder("[");
+        for (String trip : allTrips) {
+            if (tripsJson.length() > 1) {
+                tripsJson.append(",");
+            }
+            tripsJson.append(trip);
+        }
+        tripsJson.append("]");
+
+        resp.getWriter().write(String.format("{\"trips\": %s}", tripsJson.toString()));
+    }
+    
 }
