@@ -16,6 +16,16 @@ import java.util.regex.Pattern;
 import org.json.JSONObject;
 
 public class TripServlet extends HttpServlet {
+    private Kuruma kuruma;
+
+    public TripServlet() {
+        try {
+            this.kuruma = new Kuruma();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sessionId = req.getHeader("Session-Id");
@@ -44,9 +54,7 @@ public class TripServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         try {
-            Kuruma kuruma = new Kuruma();
             int id = kuruma.trip_create(username, cities[0], cities[1]);
-            kuruma.close();
             resp.getWriter().write(String.format("{\"status\": \"Trip created\", \"tripDetails\": %s}", createTripJson(username, id, cities[0], cities[1])));
         } catch (Exception e) {
             return;
@@ -69,12 +77,8 @@ public class TripServlet extends HttpServlet {
 
         String trips_json = "";
         try {
-            Kuruma kuruma = new Kuruma();
-
             List<Map<String, Object>> trips = kuruma.trip_get_driver(username);
             trips_json = convertListToJSON(trips);
-
-            kuruma.close();
         } catch (Exception e) {
 
         }
