@@ -22,21 +22,43 @@ public class LoginServlet extends HttpServlet {
         }
 
         String[] credentials = stringBuilder.toString().split(":");
-        String username = credentials[0];
-        String password = credentials[1];
-        try {
-            Kuruma kuruma = new Kuruma();
-            if (kuruma.account_login(username, password)) {
+        String action = credentials[0];
+        String username = credentials[1];
+        String password = credentials[2];
+        if ("login".equals(action)) {
+            try {
+                Kuruma kuruma = new Kuruma();
+                if (kuruma.account_login(username, password)) {
+                    String sessionId = req.getSession(true).getId();
+                    sessions.put(sessionId, username);
+
+                    resp.setContentType("application/json");
+                    resp.setCharacterEncoding("UTF-8");
+                    System.out.println("{\"sessionId\": \"" + sessionId + "\", \"username\": \"" + username + "\"}");;
+
+                    resp.getWriter()
+                            .write("{\"sessionId\": \"" + sessionId + "\", \"username\": \"" + username + "\"}");
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        else if ("register".equals(action)) {
+            try {
+                Kuruma kuruma = new Kuruma();
+
+                kuruma.account_create(username, password);
                 String sessionId = req.getSession(true).getId();
                 sessions.put(sessionId, username);
 
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write("{\"sessionId\": \"" + sessionId + "\", \"username\": \"" + username + "\"}");
-            } else {
-                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            } catch (Exception e) {
+
             }
-        }catch (Exception e){
 
         }
     }
