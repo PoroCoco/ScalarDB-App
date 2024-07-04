@@ -16,6 +16,16 @@ import java.util.regex.Pattern;
 import org.json.JSONObject;
 
 public class TripServlet extends HttpServlet {
+    private Kuruma kuruma;
+
+    public TripServlet() {
+        try {
+            this.kuruma = new Kuruma();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sessionId = req.getHeader("Session-Id");
@@ -44,9 +54,7 @@ public class TripServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         try {
-            Kuruma kuruma = new Kuruma();
             int id = kuruma.trip_create(username, cities[0], cities[1]);
-            kuruma.close();
             resp.getWriter().write(String.format("{\"status\": \"Trip created\", \"tripDetails\": %s}", createTripJson(username, id, cities[0], cities[1])));
         } catch (Exception e) {
             return;
@@ -69,12 +77,8 @@ public class TripServlet extends HttpServlet {
 
         String trips_json = "";
         try {
-            Kuruma kuruma = new Kuruma();
-
-            List<Map<String, Object>> trips = kuruma.trip_get_all();
+            List<Map<String, Object>> trips = kuruma.trip_get_driver(username);
             trips_json = convertListToJSON(trips);
-
-            kuruma.close();
         } catch (Exception e) {
 
         }
@@ -130,24 +134,22 @@ public class TripServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // New endpoint to get all trips
-        List<String> allTrips = new ArrayList<>();
-        for (Entry<String, List<String>> entry : trips.entrySet()) {
-            allTrips.addAll(entry.getValue());
-        }
-
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        StringBuilder tripsJson = new StringBuilder("[");
-        for (String trip : allTrips) {
-            if (tripsJson.length() > 1) {
-                tripsJson.append(",");
-            }
-            tripsJson.append(trip);
-        }
-        tripsJson.append("]");
+        String trips_json = "";
+        try {
+            Kuruma kuruma = new Kuruma();
 
-        resp.getWriter().write(String.format("{\"trips\": %s}", tripsJson.toString()));
+            List<Map<String, Object>> trips = kuruma.trip_get_all();
+            trips_json = convertListToJSON(trips);
+
+            kuruma.close();
+        } catch (Exception e) {
+
+        }
+
+        resp.getWriter().write(String.format("{\"trips\": %s}", trips_json));
     }
     
 }

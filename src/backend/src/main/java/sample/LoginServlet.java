@@ -8,10 +8,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LoginServlet extends HttpServlet {
+public class LoginServlet extends HttpServlet{
     private static final long serialVersionUID = 1L;
     private static final Map<String, String> users = new HashMap<>();
     private static final Map<String, String> sessions = new ConcurrentHashMap<>();
+    private Kuruma kuruma;
+
+    public LoginServlet() {
+        try {
+            this.kuruma = new Kuruma();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -27,7 +36,6 @@ public class LoginServlet extends HttpServlet {
         String password = credentials[2];
         if ("login".equals(action)) {
             try {
-                Kuruma kuruma = new Kuruma();
                 if (kuruma.account_login(username, password)) {
                     String sessionId = req.getSession(true).getId();
                     sessions.put(sessionId, username);
@@ -47,7 +55,6 @@ public class LoginServlet extends HttpServlet {
 
         else if ("register".equals(action)) {
             try {
-                Kuruma kuruma = new Kuruma();
 
                 kuruma.account_create(username, password);
                 String sessionId = req.getSession(true).getId();
