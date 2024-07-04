@@ -126,4 +126,28 @@ public class TripServlet extends HttpServlet {
         // Convert the JSON object to a string
         return tripJson.toString();
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        // New endpoint to get all trips
+        List<String> allTrips = new ArrayList<>();
+        for (Entry<String, List<String>> entry : trips.entrySet()) {
+            allTrips.addAll(entry.getValue());
+        }
+
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        StringBuilder tripsJson = new StringBuilder("[");
+        for (String trip : allTrips) {
+            if (tripsJson.length() > 1) {
+                tripsJson.append(",");
+            }
+            tripsJson.append(trip);
+        }
+        tripsJson.append("]");
+
+        resp.getWriter().write(String.format("{\"trips\": %s}", tripsJson.toString()));
+    }
+    
 }

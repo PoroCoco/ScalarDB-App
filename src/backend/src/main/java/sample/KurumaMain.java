@@ -50,12 +50,12 @@ public class KurumaMain {
       System.out.println(accounts_json);
     }else{
       kuruma.close();
-      System.out.println("Unknown command : " + args[1] + " with total count of args at " + args.length);
+      System.out.println("Unknown command : " + args[0] + " with total count of args at " + args.length);
       printUsageAndExit();
       return;
     }
 
-    kuruma.close();
+
   }
 
   private static String convertListToJSON(List<Map<String, Object>> data) {
@@ -73,7 +73,7 @@ public class KurumaMain {
 
   private static void printUsageAndExit() {
     System.err.println(
-        "KurumaMain -action charge/pay/getBalance [-amount number (needed for charge and pay)] [-to id (needed for charge and pay)] [-from id (needed for pay)] [-id id (needed for getBalance)]");
+        "\n\n\u001B[36mKurumaMain different actions:\n-create_account : args -> [username,password] create a new account.\n-login : args -> [username,password]  login into the app\n-create_trip : args -> [driver,departure,destination] create a trip \u001B[0m");
     System.exit(1);
   }
 }
