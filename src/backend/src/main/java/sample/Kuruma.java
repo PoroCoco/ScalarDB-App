@@ -34,7 +34,7 @@ public class Kuruma {
   
   private static final String TABLE_TRIPS_PASSENGERS = "trips_passengers";
   private static final String TRIPS_PASSENGERS_TRIP = "trip_id";
-  private static final String TRIPS_PASSENGERS_USER = "user_id";
+  private static final String TRIPS_PASSENGERS_USER = "username";
 
   private final DistributedTransactionManager manager;
 
@@ -234,6 +234,86 @@ public class Kuruma {
       throw e;
     }
   }
+
+  public void passenger_register(String username, int tripId) throws TransactionException {
+    // Start a transaction
+    DistributedTransaction tx = manager.start();
+    try {
+      Put put =
+          Put.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS_PASSENGERS)
+              .partitionKey(Key.ofInt(TRIPS_PASSENGERS_TRIP, tripId))
+              .textValue(TRIPS_PASSENGERS_USER, username)
+              .build();
+      tx.put(put);
+
+      tx.commit();
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
+
+  public List<String> passenger_get_from_trip(int tripId) throws TransactionException {
+    List<String> passengers = new ArrayList<>();
+    DistributedTransaction tx = manager.start();
+    try {
+      Scan scan =
+              Scan.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS_PASSENGERS)
+              .all()
+              .build();
+
+      // Execute the scan operation
+      List<Result> results = tx.scan(scan);
+
+      // Process the results
+      for (Result result : results) {
+        if (result.getInt(TRIPS_PASSENGERS_TRIP) == tripId){
+          passengers.add(result.getText(TRIPS_PASSENGERS_USER));
+        }
+      }
+
+      tx.commit();
+      return passengers;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
+
+    public List<Integer> passenger_get_from_username(String username) throws TransactionException {
+    List<Integer> trips = new ArrayList<>();
+    DistributedTransaction tx = manager.start();
+    try {
+      Scan scan =
+              Scan.newBuilder()
+              .namespace(NAMESPACE)
+              .table(TABLE_TRIPS_PASSENGERS)
+              .all()
+              .build();
+
+      // Execute the scan operation
+      List<Result> results = tx.scan(scan);
+
+      // Process the results
+      for (Result result : results) {
+        if (result.getText(TRIPS_PASSENGERS_USER).equals(username)){
+          trips.add(result.getInt(TRIPS_PASSENGERS_TRIP));
+        }
+      }
+
+      tx.commit();
+      return trips;
+    } catch (Exception e) {
+      tx.abort();
+      throw e;
+    }
+  }
+
+
 
   public void close() {
     manager.close();

@@ -48,14 +48,32 @@ public class KurumaMain {
       String accounts_json = convertListToJSON(accounts);
       System.out.println("There are " + accounts_count + " accounts : ");
       System.out.println(accounts_json);
+    }else if ("-register_passenger".equals(args[0]) && args.length == 3){
+      String username = args[1]; 
+      int tripId = Integer.parseInt(args[2]);
+      kuruma.passenger_register(username, tripId);
+      System.out.println("Registered user " + username + " on the trip n° " + tripId);
+    }else if ("-get_passengers_from_trip".equals(args[0]) && args.length == 2){
+      int tripId = Integer.parseInt(args[1]);
+      List<String> passengers = kuruma.passenger_get_from_trip(tripId);
+      System.out.println("For the trip n° " + tripId +", the registered passengers are : ");
+      for(String passenger : passengers){
+        System.out.println("\t" + passenger);
+      }
+    }else if ("-get_passengers_from_username".equals(args[0]) && args.length == 2){
+      String username = args[1];
+      List<Integer> trips = kuruma.passenger_get_from_username(username);
+      System.out.println("For the user " + username +", the trips to which they are registred are : ");
+      for(int trip : trips){
+        System.out.println("\t" + trip);
+      }
     }else{
       kuruma.close();
       System.out.println("Unknown command : " + args[0] + " with total count of args at " + args.length);
       printUsageAndExit();
       return;
     }
-
-
+    kuruma.close();
   }
 
   private static String convertListToJSON(List<Map<String, Object>> data) {
@@ -73,7 +91,16 @@ public class KurumaMain {
 
   private static void printUsageAndExit() {
     System.err.println(
-        "\n\n\u001B[36mKurumaMain different actions:\n-create_account : args -> [username,password] create a new account.\n-login : args -> [username,password]  login into the app\n-create_trip : args -> [driver,departure,destination] create a trip \u001B[0m");
+        "\n\n\u001B[36mKurumaMain different actions:\n"+
+        "\t-create_account : args -> [username, password] Creates a new account.\n"+
+        "\t-login : args -> [username, password] Verify if the username and password matches\n"+
+        "\t-create_trip : args -> [driver, departure, destination] Creates a trip\n"+
+        "\t-get_all_trips : args -> [] Returns all of the trips stored in the database.\n"+
+        "\t-get_driver_trips : args -> [username] Returns all of the trips created by the driver 'username'.\n"+
+        "\t-register_passenger : args -> [username, tripId] Registers the user 'username' to the specified trip.\n"+
+        "\t-get_passengers_from_trip : args -> [tripId] Returns all of the passengers registred to the specified trip.\n"+
+        "\t-get_passengers_from_username : args -> [username] Returns all of the trips where 'username' is registered.\n"+
+        "\u001B[0m");
     System.exit(1);
   }
 }
