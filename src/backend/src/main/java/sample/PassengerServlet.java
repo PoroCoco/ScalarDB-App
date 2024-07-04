@@ -49,7 +49,6 @@ public class PassengerServlet extends HttpServlet {
         String requestBody = stringBuilder.toString();
         
         System.out.println(requestBody);
-        return;
         // int tripId = 0;
         // String trips_json = "";
         // try {
@@ -67,7 +66,7 @@ public class PassengerServlet extends HttpServlet {
 
         // }
 
-        // resp.getWriter().write(String.format("{\"trips\": %s}", trips_json));
+        resp.getWriter().write(String.format("{\"trips\": ok}"));
     }
 
     private static String convertListToJSON(List<Map<String, Object>> data) {
